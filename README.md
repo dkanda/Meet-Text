@@ -1,8 +1,10 @@
 #Meet Text
 ================================
 ##Requirements
-*Cordova 2.9.x
-*Android 3.*+
+
+* Cordova 2.9.x
+
+* Android 3.*+
 
 ##How it works
 
