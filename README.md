@@ -1,8 +1,10 @@
-Meet Text
+#Meet Text
 ================================
-Requirements
-[li]Cordova 2.9.x
-[li]Android 3.*+
+##Requirements
+*Cordova 2.9.x
+*Android 3.*+
+
+##How it works
 
 I wrote this after locating friends at a football game with great difficulty. 
 Press a button to find your GPS coordinates then search for a person from your 
