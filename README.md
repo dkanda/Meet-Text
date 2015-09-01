@@ -1,7 +1,8 @@
 #Meet Text
 
-Cordova-based Android app to send gps coordinates as an SMS
-================================
+###Cordova-based Android app to send gps coordinates as an SMS
+
+
 ##Requirements
 
 * Cordova 2.9.x
