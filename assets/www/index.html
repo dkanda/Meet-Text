@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=2, maximum-scale=2, minimum-scale=2" />
+        <!--<link rel="stylesheet" type="text/css" href="css/index.css" />-->
+        <link rel="stylesheet" type="text/css" href="js/jquery.mobile-1.3.2.min.css">
+        <link rel="stylesheet" type="text/css" href="js/jquery.mobile.structure-1.3.2.min.css">
+        <link rel="stylesheet" type="text/css" href="js/jquery.mobile.theme-1.3.2.min.css">
+        <title>Hello World</title>
+    </head>
+    <body>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/smsplugin.js"></script>
+        <!-- <script type="text/javascript" src="js/jquery.mobile-1.3.2.js"></script>-->
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.mobile-1.3.2.min.js"></script>
+        <script type="text/javascript" charset="utf-8">
+        document.addEventListener("deviceready", onDeviceReady, false);
+        var lat = 1.0;
+        var lng = 1.0;
+        // device APIs are available
+        //
+        function onDeviceReady() {
+            
+             function DoThis(sup)
+             {
+                  var options = new ContactFindOptions();
+                  options.filter = sup;
+                  options.multiple = true;
+                  var fields = ["displayName", "name", "phoneNumbers"];
+                  navigator.contacts.find(fields, onContactSuccess, onContactError, options); 
+             }
+         
+
+            $(".suggestionsinput").change(function () {
+              typewatch(function () {
+                if($(".suggestionsinput").val() != "")
+                {
+                    // make suggestions visible
+                    $("#suggestions").css('visibility', 'visible');
+                    $("#suggestions").fadeIn('slow');
+                    DoThis($(".suggestionsinput").val());
+
+                } else {
+                    // hide suggestions
+                    $("#suggestions").fadeOut('slow', function(){
+                        $("#suggestions").css('visibility', 'hidden');
+                    });
+ 
+                }
+              }, 500);
+            });
+
+            function onContactSuccess(contacts)
+            {
+                 $("#pair").unbind();
+                 $('.searchterm').html('');
+                 for (var i = 0; i < contacts.length; i++) 
+                 {
+                       if(contacts[i].phoneNumbers != null )
+                        {          
+                            $('.searchterm').html($('.searchterm').html() +'<div id="pair"><div id="result">'+contacts[i].displayName + '</div><div id="phone"> ' + contacts[i].phoneNumbers[0].value + '</div></div>');
+                           
+                        }
+                 }
+
+                 $('.searchterm').on('click', '#pair', function(e) {
+                    //name = $(this).find("#result").html();
+                    var number = $(this).find("#phone").html();
+                    
+                    if($("#textinput1").val() != '')
+                    {
+                        $("#textinput1").val($("#textinput1").val() +", ");
+                    }
+                    $("#textinput1").val($("#textinput1").val() + number.replace(/\(|\-|\)| |\+/mg,""));
+                    $(".suggestionsinput").val("");
+                    $(".searchterm").html('');
+                    e.stopImmediatePropagation();
+                });
+            }
+
+            function onContactError(data)
+            {
+                alert('onError!');
+            }
+
+            $("#textTexts").click(function()
+            {
+                if(lat == 1.0 || lng == 1.0)
+                {
+                    alert("Press the 'Locate Me' button to get your current coordinates");
+                    return false;
+                }
+                if($("#textinput1").val() == "")
+                {
+                    alert("Enter at least one reciepient")
+                    return false;
+                }
+                j=0;
+                numberList = $("#textinput1").val();
+                numberList = numberList.replace(/ /mg,"");
+                numberArr = numberList.split(",");
+                numOfRecepients = numberArr.length;
+                for(i = 0; i < numOfRecepients; i++) 
+                {
+                    SmsPlugin.prototype.send(numberArr[i], 'https://maps.google.com/maps?q='+lat+','+lng+'\n Sent with meetext. Download meetext in the Play Store', '',
+                    function () {
+                        j++;
+                     },
+                        function (e) {
+                            alert('Message Failed:' + e);
+                        }
+                    );
+                }
+                alert(j +" out of " + numOfRecepients +" sent successfully");
+            });
+            
+            //function to wait for pause in typing before beginning query 
+            var typewatch = (function(){
+              var timer = 0;
+              return function(callback, ms){
+                clearTimeout (timer);
+                timer = setTimeout(callback, ms);
+              }  
+            })();    
+      }  
+
+      $(document).ready(function(){  
+          
+          $("#locateMe").click(function(){
+                                
+            navigator.geolocation.getCurrentPosition(onPositionSuccess, onPositionError, {
+                    enableHighAccuracy: true,
+                    timeout: 20000,
+                     maximumAge: 1000
+                    });
+                     
+                    $('body').addClass("loading");
+            });
+
+
+                // onSuccess Geolocation 
+                function onPositionSuccess(position) {
+                    lat = position.coords.latitude;
+                    lng = position.coords.longitude;
+                    $('body').removeClass("loading");
+                    $("#coords").text("("+lat+","+lng+")");
+                    $("#coords").css('visibility', 'visible');
+                    $("#coords").fadeIn('slow');
+                }
+
+                function onPositionError()
+                {
+                    alert("broken");
+                } 
+        
+            $("#share").click(function(){
+                
+            });
+
+        })
+
+
+
+        </script>
+        
+    <div data-theme="a" data-role="header">
+        <h3>
+            Meetext
+        </h3>
+    </div>
+    <div data-role="content">
+        <a data-role="button" id="locateMe" rel="external" href="#page1" data-icon="search" data-iconpos="left" >
+            Locate Me
+        </a>
+        <div id="coords" style="text-align:center;visibility:hidden"></div>
+        <div data-role="fieldcontain">
+            <label for="searchinput1">
+                Add from contacts
+            </label>
+            <input name="" id="searchinput1" name="suggestions" class="suggestionsinput" placeholder="ie. John Smith" value="" type="search">
+        </div>
+        <div id="suggestions">
+            <span class="searchterm"></span>
+        </div>
+        <div data-role="fieldcontain">
+            <input name="" id="textinput1" placeholder="Add numbers here" value=""
+            type="text" data-mini="true">
+        </div>
+        <a data-role="button" id="textTexts" href="#page1">
+            Send Text
+        </a>
+         <a data-role="button" id="share" href="#page1">
+            Share Meetext with Recepients
+        </a>
+    </div>
+</div>
+<div class="modal"></div>
+
+    </body>
+</html>
